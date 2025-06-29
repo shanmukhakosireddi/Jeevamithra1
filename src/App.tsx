@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth } from './firebase/config';
-import { useAuth } from './hooks/useAuth';
-import { AuthScreen } from './components/auth/AuthScreen';
-import { ProfileSection } from './components/profile/ProfileSection';
+import { useLocalAuth } from './hooks/useLocalAuth';
+import { LocalAuthScreen } from './components/auth/LocalAuthScreen';
+import { LocalProfileSection } from './components/profile/LocalProfileSection';
 import { HomePage } from './components/HomePage';
 import { ChatPage } from './components/ChatPage';
 import { ModeInputPage } from './components/ModeInputPage';
@@ -17,7 +15,7 @@ type Page = 'home' | 'health-input' | 'farming-input' | 'education-input' | 'hea
 type AssistantMode = 'general' | 'farming' | 'health' | 'education' | 'news' | 'schemes';
 
 function App() {
-  const { user, userProfile, loading, setUserProfile } = useAuth();
+  const { user, userProfile, loading, logout, setUserProfile } = useLocalAuth();
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [assistantMode, setAssistantMode] = useState<AssistantMode>('general');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,7 +42,7 @@ function App() {
 
   // Show auth screen if not logged in
   if (!user || !userProfile) {
-    return <AuthScreen teluguMode={teluguMode} />;
+    return <LocalAuthScreen teluguMode={teluguMode} />;
   }
 
   // Add welcome message when entering chat with mode-specific content
@@ -266,7 +264,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await logout();
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -297,7 +295,7 @@ function App() {
         </header>
 
         <main className="px-6 py-8">
-          <ProfileSection 
+          <LocalProfileSection 
             userProfile={userProfile} 
             setUserProfile={setUserProfile}
             teluguMode={teluguMode} 
@@ -336,6 +334,25 @@ function App() {
           >
             <LogOut size={20} />
           </button>
+        </div>
+
+        {/* User Info Display */}
+        <div className="fixed top-6 right-6 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg border border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-bold">
+                {userProfile.fullName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                {userProfile.fullName}
+              </p>
+              <p className="text-xs text-gray-600">
+                {teluguMode ? 'స్థానిక ఖాతా' : 'Local Account'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );

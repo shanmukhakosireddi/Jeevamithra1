@@ -80,6 +80,8 @@ export const LocalAuthScreen: React.FC<LocalAuthScreenProps> = ({ teluguMode }) 
         setError(errorMessage);
       } else {
         setSuccess(teluguMode ? 'విజయవంతంగా లాగిన్ అయ్యారు!' : 'Successfully logged in!');
+        // The useLocalAuth hook will automatically redirect to the main app
+        // No need for manual redirect here
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -139,6 +141,8 @@ export const LocalAuthScreen: React.FC<LocalAuthScreenProps> = ({ teluguMode }) 
         setError(errorMessage);
       } else {
         setSuccess(teluguMode ? 'విజయవంతంగా రిజిస్టర్ అయ్యారు!' : 'Successfully registered!');
+        // The useLocalAuth hook will automatically redirect to the main app
+        // No need for manual redirect here
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -146,20 +150,6 @@ export const LocalAuthScreen: React.FC<LocalAuthScreenProps> = ({ teluguMode }) 
     } finally {
       setLoading(false);
     }
-  };
-
-  // Demo accounts for testing
-  const demoAccounts = [
-    { email: 'demo@jeevamithra.com', password: 'demo123', name: 'Demo User' },
-    { email: 'farmer@village.com', password: 'farmer123', name: 'Village Farmer' },
-    { email: 'student@school.com', password: 'student123', name: 'Student User' }
-  ];
-
-  const fillDemoAccount = (account: typeof demoAccounts[0]) => {
-    setLoginForm({
-      email: account.email,
-      password: account.password
-    });
   };
 
   return (
@@ -228,27 +218,6 @@ export const LocalAuthScreen: React.FC<LocalAuthScreenProps> = ({ teluguMode }) 
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-2">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
               <span className="text-red-700 text-sm">{error}</span>
-            </div>
-          )}
-
-          {/* Demo Accounts (only for login) */}
-          {isLogin && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-              <h4 className="text-sm font-medium text-blue-800 mb-3">
-                {teluguMode ? '🧪 డెమో ఖాతాలు:' : '🧪 Demo Accounts:'}
-              </h4>
-              <div className="space-y-2">
-                {demoAccounts.map((account, index) => (
-                  <button
-                    key={index}
-                    onClick={() => fillDemoAccount(account)}
-                    className="w-full text-left p-2 bg-white rounded-lg hover:bg-blue-50 transition-colors text-xs"
-                  >
-                    <div className="font-medium text-blue-800">{account.name}</div>
-                    <div className="text-blue-600">{account.email}</div>
-                  </button>
-                ))}
-              </div>
             </div>
           )}
 

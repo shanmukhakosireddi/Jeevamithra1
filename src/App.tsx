@@ -15,6 +15,7 @@ type Page = 'home' | 'health-input' | 'farming-input' | 'education-input' | 'hea
 type AssistantMode = 'general' | 'farming' | 'health' | 'education' | 'news' | 'schemes';
 
 function App() {
+  // ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL LOGIC
   const { user, userProfile, loading, logout, setUserProfile } = useLocalAuth();
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [assistantMode, setAssistantMode] = useState<AssistantMode>('general');
@@ -26,25 +27,6 @@ function App() {
   const [pendingUserMessage, setPendingUserMessage] = useState<string>('');
   const [showProfile, setShowProfile] = useState(false);
 
-  // Show loading screen while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">
-            {teluguMode ? 'లోడ్ అవుతోంది...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show auth screen if not logged in
-  if (!user || !userProfile) {
-    return <LocalAuthScreen teluguMode={teluguMode} />;
-  }
-
   // Add welcome message when entering chat with mode-specific content
   useEffect(() => {
     if ((currentPage === 'health-chat' || currentPage === 'farming-chat' || currentPage === 'education-chat') && messages.length === 0) {
@@ -52,20 +34,20 @@ function App() {
         switch (assistantMode) {
           case 'farming':
             return teluguMode 
-              ? `🌾 నమస్కారం ${userProfile.fullName}! నేను మీ AI వ్యవసాయ సహాయకుడిని. పంటలు, మట్టి, కీటకాలు, నీటిపారుదల మరియు దిగుబడి ఎలా పెంచాలో నన్ను అడగండి.`
-              : `🌾 Hello ${userProfile.fullName}! I'm your AI Farming Assistant. Ask me anything about crops, soil, pests, irrigation, and how to increase yield.`;
+              ? `🌾 నమస్కారం ${userProfile?.fullName || ''}! నేను మీ AI వ్యవసాయ సహాయకుడిని. పంటలు, మట్టి, కీటకాలు, నీటిపారుదల మరియు దిగుబడి ఎలా పెంచాలో నన్ను అడగండి.`
+              : `🌾 Hello ${userProfile?.fullName || ''}! I'm your AI Farming Assistant. Ask me anything about crops, soil, pests, irrigation, and how to increase yield.`;
           case 'health':
             return teluguMode 
-              ? `👩‍⚕️ నమస్కారం ${userProfile.fullName}! నేను మీ AI ఆరోగ్య సహాయకుడిని. లక్షణాలు, మందులు, చికిత్సలు మరియు ఆరోగ్యంగా ఎలా ఉండాలో నేను మీకు సహాయం చేయగలను.`
-              : `👩‍⚕️ Hello ${userProfile.fullName}! I'm your AI Health Assistant. I can help you with symptoms, medicines, treatments, and how to stay healthy.`;
+              ? `👩‍⚕️ నమస్కారం ${userProfile?.fullName || ''}! నేను మీ AI ఆరోగ్య సహాయకుడిని. లక్షణాలు, మందులు, చికిత్సలు మరియు ఆరోగ్యంగా ఎలా ఉండాలో నేను మీకు సహాయం చేయగలను.`
+              : `👩‍⚕️ Hello ${userProfile?.fullName || ''}! I'm your AI Health Assistant. I can help you with symptoms, medicines, treatments, and how to stay healthy.`;
           case 'education':
             return teluguMode 
-              ? `📚 నమస్కారం ${userProfile.fullName}! నేను మీ AI విద్యా గైడ్‌ని. పాఠశాల విషయాలు, పరీక్షలు, స్కాలర్‌షిప్‌లు మరియు కెరీర్ గైడెన్స్‌లో నేను మీకు సహాయం చేయగలను.`
-              : `📚 Hello ${userProfile.fullName}! I'm your AI Education Guide. I can help you with school subjects, exams, scholarships, and career guidance.`;
+              ? `📚 నమస్కారం ${userProfile?.fullName || ''}! నేను మీ AI విద్యా గైడ్‌ని. పాఠశాల విషయాలు, పరీక్షలు, స్కాలర్‌షిప్‌లు మరియు కెరీర్ గైడెన్స్‌లో నేను మీకు సహాయం చేయగలను.`
+              : `📚 Hello ${userProfile?.fullName || ''}! I'm your AI Education Guide. I can help you with school subjects, exams, scholarships, and career guidance.`;
           default:
             return teluguMode 
-              ? `నమస్కారం ${userProfile.fullName}! నేను జీవమిత్ర. మీకు ఆరోగ్యం, వ్యవసాయం లేదా ఏదైనా సందేహాలు ఉంటే అడగండి.`
-              : `Namaste ${userProfile.fullName}! I am Jeevamithra, your village assistant. Ask me about health, farming, or any daily questions.`;
+              ? `నమస్కారం ${userProfile?.fullName || ''}! నేను జీవమిత్ర. మీకు ఆరోగ్యం, వ్యవసాయం లేదా ఏదైనా సందేహాలు ఉంటే అడగండి.`
+              : `Namaste ${userProfile?.fullName || ''}! I am Jeevamithra, your village assistant. Ask me about health, farming, or any daily questions.`;
         }
       };
 
@@ -103,7 +85,28 @@ function App() {
         }
       }
     }
-  }, [currentPage, teluguMode, voiceEnabled, messages.length, assistantMode, pendingUserMessage, userProfile.fullName]);
+  }, [currentPage, teluguMode, voiceEnabled, messages.length, assistantMode, pendingUserMessage, userProfile?.fullName]);
+
+  // NOW CONDITIONAL LOGIC CAN COME AFTER ALL HOOKS
+  
+  // Show loading screen while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">
+            {teluguMode ? 'లోడ్ అవుతోంది...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth screen if not logged in
+  if (!user || !userProfile) {
+    return <LocalAuthScreen teluguMode={teluguMode} />;
+  }
 
   const handleInitialMessage = async (text: string) => {
     setIsLoading(true);

@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useLocalAuth } from './hooks/useLocalAuth';
-import { LocalAuthScreen } from './components/auth/LocalAuthScreen';
-import { LocalProfileSection } from './components/profile/LocalProfileSection';
 import { HomePage } from './components/HomePage';
 import { ChatPage } from './components/ChatPage';
 import { ModeInputPage } from './components/ModeInputPage';
@@ -16,7 +13,6 @@ type AssistantMode = 'general' | 'farming' | 'health' | 'education' | 'news' | '
 
 function App() {
   // ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL LOGIC
-  const { user, userProfile, loading, logout, setUserProfile } = useLocalAuth();
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [assistantMode, setAssistantMode] = useState<AssistantMode>('general');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -25,7 +21,6 @@ function App() {
   const [teluguMode, setTeluguMode] = useLocalStorage('teluguMode', false);
   const [voiceEnabled, setVoiceEnabled] = useLocalStorage('voiceEnabled', true);
   const [pendingUserMessage, setPendingUserMessage] = useState<string>('');
-  const [showProfile, setShowProfile] = useState(false);
 
   // Add welcome message when entering chat with mode-specific content
   useEffect(() => {
@@ -34,20 +29,20 @@ function App() {
         switch (assistantMode) {
           case 'farming':
             return teluguMode 
-              ? `🌾 నమస్కారం ${userProfile?.fullName || ''}! నేను మీ AI వ్యవసాయ సహాయకుడిని. పంటలు, మట్టి, కీటకాలు, నీటిపారుదల మరియు దిగుబడి ఎలా పెంచాలో నన్ను అడగండి.`
-              : `🌾 Hello ${userProfile?.fullName || ''}! I'm your AI Farming Assistant. Ask me anything about crops, soil, pests, irrigation, and how to increase yield.`;
+              ? `🌾 నమస్కారం! నేను మీ AI వ్యవసాయ సహాయకుడిని. పంటలు, మట్టి, కీటకాలు, నీటిపారుదల మరియు దిగుబడి ఎలా పెంచాలో నన్ను అడగండి.`
+              : `🌾 Hello! I'm your AI Farming Assistant. Ask me anything about crops, soil, pests, irrigation, and how to increase yield.`;
           case 'health':
             return teluguMode 
-              ? `👩‍⚕️ నమస్కారం ${userProfile?.fullName || ''}! నేను మీ AI ఆరోగ్య సహాయకుడిని. లక్షణాలు, మందులు, చికిత్సలు మరియు ఆరోగ్యంగా ఎలా ఉండాలో నేను మీకు సహాయం చేయగలను.`
-              : `👩‍⚕️ Hello ${userProfile?.fullName || ''}! I'm your AI Health Assistant. I can help you with symptoms, medicines, treatments, and how to stay healthy.`;
+              ? `👩‍⚕️ నమస్కారం! నేను మీ AI ఆరోగ్య సహాయకుడిని. లక్షణాలు, మందులు, చికిత్సలు మరియు ఆరోగ్యంగా ఎలా ఉండాలో నేను మీకు సహాయం చేయగలను.`
+              : `👩‍⚕️ Hello! I'm your AI Health Assistant. I can help you with symptoms, medicines, treatments, and how to stay healthy.`;
           case 'education':
             return teluguMode 
-              ? `📚 నమస్కారం ${userProfile?.fullName || ''}! నేను మీ AI విద్యా గైడ్‌ని. పాఠశాల విషయాలు, పరీక్షలు, స్కాలర్‌షిప్‌లు మరియు కెరీర్ గైడెన్స్‌లో నేను మీకు సహాయం చేయగలను.`
-              : `📚 Hello ${userProfile?.fullName || ''}! I'm your AI Education Guide. I can help you with school subjects, exams, scholarships, and career guidance.`;
+              ? `📚 నమస్కారం! నేను మీ AI విద్యా గైడ్‌ని. పాఠశాల విషయాలు, పరీక్షలు, స్కాలర్‌షిప్‌లు మరియు కెరీర్ గైడెన్స్‌లో నేను మీకు సహాయం చేయగలను.`
+              : `📚 Hello! I'm your AI Education Guide. I can help you with school subjects, exams, scholarships, and career guidance.`;
           default:
             return teluguMode 
-              ? `నమస్కారం ${userProfile?.fullName || ''}! నేను జీవమిత్ర. మీకు ఆరోగ్యం, వ్యవసాయం లేదా ఏదైనా సందేహాలు ఉంటే అడగండి.`
-              : `Namaste ${userProfile?.fullName || ''}! I am Jeevamithra, your village assistant. Ask me about health, farming, or any daily questions.`;
+              ? `నమస్కారం! నేను జీవమిత్ర. మీకు ఆరోగ్యం, వ్యవసాయం లేదా ఏదైనా సందేహాలు ఉంటే అడగండి.`
+              : `Namaste! I am Jeevamithra, your village assistant. Ask me about health, farming, or any daily questions.`;
         }
       };
 
@@ -85,28 +80,7 @@ function App() {
         }
       }
     }
-  }, [currentPage, teluguMode, voiceEnabled, messages.length, assistantMode, pendingUserMessage, userProfile?.fullName]);
-
-  // NOW CONDITIONAL LOGIC CAN COME AFTER ALL HOOKS
-  
-  // Show loading screen while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">
-            {teluguMode ? 'లోడ్ అవుతోంది...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show auth screen if not logged in
-  if (!user || !userProfile) {
-    return <LocalAuthScreen teluguMode={teluguMode} />;
-  }
+  }, [currentPage, teluguMode, voiceEnabled, messages.length, assistantMode, pendingUserMessage]);
 
   const handleInitialMessage = async (text: string) => {
     setIsLoading(true);
@@ -254,7 +228,6 @@ function App() {
     setMessages([]);
     setError(null);
     setPendingUserMessage('');
-    setShowProfile(false);
   };
 
   const toggleLanguage = () => {
@@ -264,49 +237,6 @@ function App() {
   const toggleVoice = () => {
     setVoiceEnabled(!voiceEnabled);
   };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
-  // If showing profile, render profile section
-  if (showProfile) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        {/* Header with back button and logout */}
-        <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 px-6 py-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <button
-              onClick={() => setShowProfile(false)}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <span>← {teluguMode ? 'వెనుకకు' : 'Back'}</span>
-            </button>
-            
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors"
-            >
-              <LogOut size={16} />
-              <span>{teluguMode ? 'లాగ్ అవుట్' : 'Logout'}</span>
-            </button>
-          </div>
-        </header>
-
-        <main className="px-6 py-8">
-          <LocalProfileSection 
-            userProfile={userProfile} 
-            setUserProfile={setUserProfile}
-            teluguMode={teluguMode} 
-          />
-        </main>
-      </div>
-    );
-  }
 
   // Render appropriate page
   if (currentPage === 'home') {
@@ -319,44 +249,6 @@ function App() {
           voiceEnabled={voiceEnabled}
           onToggleVoice={toggleVoice}
         />
-        
-        {/* Profile and Logout buttons */}
-        <div className="fixed bottom-6 right-6 flex flex-col space-y-3">
-          <button
-            onClick={() => setShowProfile(true)}
-            className="w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
-            title={teluguMode ? 'నా ప్రొఫైల్' : 'My Profile'}
-          >
-            👤
-          </button>
-          
-          <button
-            onClick={handleLogout}
-            className="w-14 h-14 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
-            title={teluguMode ? 'లాగ్ అవుట్' : 'Logout'}
-          >
-            <LogOut size={20} />
-          </button>
-        </div>
-
-        {/* User Info Display */}
-        <div className="fixed top-6 right-6 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg border border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">
-                {userProfile.fullName.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">
-                {userProfile.fullName}
-              </p>
-              <p className="text-xs text-gray-600">
-                {teluguMode ? 'స్థానిక ఖాతా' : 'Local Account'}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
